@@ -17,7 +17,7 @@
         <div class="card-body">
           <h5 class="card-title"><%= listing.title %></h5>
           <p class="card-text"><%= listing.description.substring(0, 70) %>...</p>
-          <p class="card-text"><strong>₹ <%= listing.price %></strong></p>
+          <p class="card-text"><strong>₹ <%= listing.price.toLocaleString('en-IN') %>/night</strong></p>
           <a href="/listings/<%= listing._id %>" class="btn btn-outline-primary btn-sm">
             View Details
           </a>
