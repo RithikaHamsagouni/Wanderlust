@@ -1,0 +1,29 @@
+<% layout("/layouts/boilerplate") %>
+
+<h3 class="mb-4">All Listings</h3>
+
+<a href="/listings/new" class="btn btn-primary mb-4">Create New Listing</a>
+
+<div class="row">
+  <% for (let listing of alllistings) { %>
+    <div class="col-md-4 mb-4">
+      <div class="card">
+        <img
+          src="<%= listing.image && listing.image.url ? listing.image.url : '/images/default-listing.jpg' %>"
+          class="card-img-top"
+          alt="listing-image"
+          onerror="this.src='/images/default-listing.jpg';"
+        />
+        <div class="card-body">
+          <h5 class="card-title"><%= listing.title %></h5>
+          <p class="card-text"><%= listing.description.substring(0, 70) %>...</p>
+          <p class="card-text"><strong>₹ <%= listing.price %></strong></p>
+          <a href="/listings/<%= listing._id %>" class="btn btn-outline-primary btn-sm">
+            View Details
+          </a>
+        </div>
+      </div>
+    </div>
+  <% } %>
+</div>
+
