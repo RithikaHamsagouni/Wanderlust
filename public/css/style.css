@@ -367,3 +367,88 @@ body {
   max-height: 600px;
   overflow-y: auto;
 }
+.starability-basic {
+  display: flex;
+  flex-direction: row-reverse; /* keep rating logic correct */
+  justify-content: center;     /* centers the stars horizontally */
+  gap: 0.5rem;                 /* space between stars */
+  font-size: 0;                /* hide text fallback */
+}
+
+.starability-basic input {
+  position: absolute;
+  left: -9999px; /* hide radio buttons */
+}
+
+.starability-basic label {
+  font-size: 3rem;   /* make stars bigger */
+  cursor: pointer;
+  color: #ddd;
+  transition: color 0.2s ease;
+}
+
+.starability-basic label:hover,
+.starability-basic label:hover ~ label,
+.starability-basic input:checked ~ label {
+  color: #ffd700;   /* gold color on hover or selected */
+}
+@media (max-width: 768px) {
+  .starability-basic label {
+    font-size: 2.2rem; /* slightly smaller stars on smaller screens */
+  }
+}
+/* Listing Card */
+.listing-card {
+  background-color: #fff;
+  border-radius: 16px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+  padding: 2rem;   /* space inside the card */
+}
+
+/* Listing Actions (Edit/Delete/Back) */
+.listing-actions {
+  display: flex;
+  flex-wrap: wrap; 
+  justify-content: space-between; /* left buttons left, back button right */
+  gap: 1rem;
+  margin-top: 1.5rem;
+  align-items: center;
+  padding: 1rem;           /* space from edges */
+  box-sizing: border-box;   /* ensures padding doesn’t break layout */
+}
+
+.left-buttons {
+  display: flex;
+  gap: 1rem; /* space between Edit & Delete */
+}
+
+.listing-actions a,
+.listing-actions form button {
+  text-decoration: none;
+  padding: 1rem 1.5rem; /* button padding */
+  border-radius: 8px;
+  font-weight: 600;
+  transition: all 0.2s ease;
+}
+
+/* Edit / Back buttons */
+.btn-secondary-custom {
+  background-color: #f0f0f0;
+  color: #222;
+  border: 1px solid #ccc;
+}
+
+.btn-secondary-custom:hover {
+  background-color: #ddd;
+}
+
+/* Delete button */
+.btn-danger-custom {
+  background-color: #fe424d;
+  color: white;
+  border: none;
+}
+
+.btn-danger-custom:hover {
+  background-color: #d93642;
+}
