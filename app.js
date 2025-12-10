@@ -5,7 +5,8 @@ const methodOverride = require("method-override");
 const mongoose = require("mongoose");
 const ejsMate = require("ejs-mate");
 const cookieParser = require("cookie-parser");
-
+const session = require("express-session");
+const flash = require("connect-flash");
 
 // Routers
 const listingRoutes = require("./routes/listings");
@@ -15,7 +16,6 @@ const wrapAsync = require("./utils/wrapAsync");
 const ExpressError = require("./utils/ExpressError");
 
 const MONGO_URL = "mongodb://127.0.0.1:27017/wanderlust";
-
 mongoose.connect(MONGO_URL)
   .then(() => console.log("Connected to DB"))
   .catch(err => console.log(err));
@@ -28,9 +28,31 @@ app.use(express.urlencoded({ extended: true }));
 app.use(methodOverride("_method"));
 app.use(express.static(path.join(__dirname, "public")));
 
-app.use(cookieParser("mysecret"));   // <-- PLACE HERE
+// ---- ORDER FIX ----
+app.use(cookieParser("mysecret"));
 
-// ===== Cookie Testing Routes =====
+const sessionOptions = {
+  secret: "mysupersecretcode",
+  resave: false,
+  saveUninitialized: true,
+  cookie: {
+    expires: Date.now() + 7 * 24 * 60 * 60 * 1000,
+    maxAge: 7 * 24 * 60 * 60 * 1000,
+    httpOnly: true,
+  }
+};
+
+app.use(session(sessionOptions));
+app.use(flash());
+
+// flash middleware
+app.use((req, res, next) => {
+  res.locals.success = req.flash("success");
+  res.locals.error = req.flash("error");
+  next();
+});
+
+// COOKIE ROUTES
 app.get("/set-cookie", (req, res) => {
   res.cookie("username", "Rithika");
   res.send("Cookie set!");
@@ -49,16 +71,16 @@ app.get("/read-signed", (req, res) => {
   res.send(req.signedCookies);
 });
 
-// ===== Use Routers =====
-app.use("/listings", listingRoutes);               // Listings routes
-app.use("/listings/:id/reviews", reviewRoutes);   // Nested reviews routes
+// Routers
+app.use("/listings", listingRoutes);
+app.use("/listings/:id/reviews", reviewRoutes);
 
 // 404 handler
 app.use((req, res, next) => {
   next(new ExpressError("Page not found!", 404));
 });
 
-// Global Error Handler
+// error handler
 app.use((err, req, res, next) => {
   const { statusCode = 500 } = err;
   if (!err.message) err.message = "Something went wrong!";

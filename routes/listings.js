@@ -32,30 +32,46 @@ router.get("/new", (req, res) => {
 router.post("/", validateListing, wrapAsync(async (req, res) => {
   const newListing = new Listing(req.body.listing);
   await newListing.save();
+  req.flash("success","New Listing Created!");
   res.redirect("/listings");
 }));
 
 // SHOW - Show single listing
 router.get("/:id", wrapAsync(async (req, res) => {
   const listing = await Listing.findById(req.params.id).populate("reviews");
+  if(!listing){
+     req.flash("error","Listing u requested for doesnot exist !");
+     res.redirect("/listings");
+  }
+  
+  
   res.render("listings/show", { listing });
 }));
 
 // EDIT - Edit form
 router.get("/:id/edit", wrapAsync(async (req, res) => {
   const listing = await Listing.findById(req.params.id);
+  if(!listing){
+     req.flash("error","Listing u requested for doesnot exist !");
+     res.redirect("/listings");
+  }
+  
   res.render("listings/edit", { listing });
 }));
 
 // UPDATE - Update listing
 router.put("/:id", validateListing, wrapAsync(async (req, res) => {
   await Listing.findByIdAndUpdate(req.params.id, { ...req.body.listing });
+   req.flash("success","Listing Updated!");
   res.redirect(`/listings/${req.params.id}`);
 }));
 
 // DELETE - Delete listing and associated reviews
 router.delete("/:id", wrapAsync(async (req, res) => {
-  await Listing.findByIdAndDelete(req.params.id);
+  let {id}= req.params;
+   let deletedListing = await Listing.findByIdAndDelete(id);
+   console.log(deletedListing);
+   req.flash("success","Listing Deleted!");
   // Reviews are deleted automatically if middleware exists in listing.js
   res.redirect("/listings");
 }));
