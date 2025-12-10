@@ -7,10 +7,14 @@ const ejsMate = require("ejs-mate");
 const cookieParser = require("cookie-parser");
 const session = require("express-session");
 const flash = require("connect-flash");
+const passport = require("passport");
+const LocalStrategy = require("passport-local");
+const User = require("./models/user");
 
 // Routers
 const listingRoutes = require("./routes/listings");
 const reviewRoutes = require("./routes/reviews");
+const userRoutes = require("./routes/user");
 
 const wrapAsync = require("./utils/wrapAsync");
 const ExpressError = require("./utils/ExpressError");
@@ -28,7 +32,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use(methodOverride("_method"));
 app.use(express.static(path.join(__dirname, "public")));
 
-// ---- ORDER FIX ----
+// ---- SESSION & AUTH SETUP ----
 app.use(cookieParser("mysecret"));
 
 const sessionOptions = {
@@ -45,14 +49,46 @@ const sessionOptions = {
 app.use(session(sessionOptions));
 app.use(flash());
 
-// flash middleware
+// Passport configuration
+app.use(passport.initialize());
+app.use(passport.session());
+
+// OPTION 1: If you want to login with EMAIL
+// Uncomment this and comment out the default strategy below
+/*
+passport.use(new LocalStrategy(
+  { usernameField: 'email' },
+  User.authenticate()
+));
+*/
+
+// OPTION 2: Default - Login with USERNAME (current setup)
+passport.use(new LocalStrategy(User.authenticate()));
+
+passport.serializeUser(User.serializeUser());
+passport.deserializeUser(User.deserializeUser());
+
+// Flash middleware - make messages available in all views
 app.use((req, res, next) => {
   res.locals.success = req.flash("success");
   res.locals.error = req.flash("error");
+  res.locals.currentUser = req.user; // Make current user available in views
   next();
 });
 
-// COOKIE ROUTES
+// Demo user route (commented out)
+/*
+app.get("/demouser", async(req, res) => {
+  let fakeUser = new User({
+    email: "student@gmail.com",
+    username: "delta-student"
+  });
+  let registeredUser = await User.register(fakeUser, "helloworld");
+  res.send(registeredUser);
+});
+*/
+
+// COOKIE ROUTES (for testing)
 app.get("/set-cookie", (req, res) => {
   res.cookie("username", "Rithika");
   res.send("Cookie set!");
@@ -71,16 +107,17 @@ app.get("/read-signed", (req, res) => {
   res.send(req.signedCookies);
 });
 
-// Routers
+// Routes
 app.use("/listings", listingRoutes);
 app.use("/listings/:id/reviews", reviewRoutes);
+app.use("/", userRoutes);
 
-// 404 handler
+// 404 handler - must be after all other routes
 app.use((req, res, next) => {
   next(new ExpressError("Page not found!", 404));
 });
 
-// error handler
+// Error handler
 app.use((err, req, res, next) => {
   const { statusCode = 500 } = err;
   if (!err.message) err.message = "Something went wrong!";
