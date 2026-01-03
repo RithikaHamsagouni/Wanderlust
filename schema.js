@@ -1,3 +1,4 @@
+const Joi = require("joi");
 module.exports.listingSchema = Joi.object({
     listing: Joi.object({  // Wrap in 'listing' object
         title: Joi.string().required(),
