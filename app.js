@@ -1,5 +1,6 @@
 if (process.env.NODE_ENV != "production") {
-    require('dotenv').config();
+   require("dotenv").config();
+
 }
 
 const express = require("express");
@@ -50,9 +51,8 @@ const store = MongoStore.create({
 });
 
 store.on("error", (err)=>{
-    console.log("SESSION STORE ERROR",e);
+    console.log("SESSION STORE ERROR", err);
 });
-
 
 // --- MIDDLEWARE SETUP (Session, Flash, etc.) ---
 const sessionOptions = {
